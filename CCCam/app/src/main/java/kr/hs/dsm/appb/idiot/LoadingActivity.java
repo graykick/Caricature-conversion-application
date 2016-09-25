@@ -108,7 +108,8 @@ public class LoadingActivity extends Activity {
     {
         try
         {
-            File path = new File(Environment.getExternalStorageDirectory() + "/Android/obb/");
+            File path = new File(Environment.getExternalStorageDirectory() + "/Android/obb/"+getPackageName());
+            System.out.println("path android    :" + path);
 
             PackageInfo info = null;
             PackageManager manager = this.getPackageManager();
@@ -119,8 +120,8 @@ public class LoadingActivity extends Activity {
 
             if (path.exists())
             {
-                File filePath = new File(path + File.separator + "main." + version + "." + getPackageName() + ".obb");
-                System.out.println(filePath);
+                File filePath = new File(path + File.separator + "main." + 156 + "." + getPackageName() + ".obb");
+                System.out.println("파일 패스   "+filePath);
 
                 ZipResourceFile zipfile = new ZipResourceFile(filePath.toString());
                 InputStream inputStream = zipfile.getInputStream("CCCam_Picture.zip");
@@ -142,7 +143,7 @@ public class LoadingActivity extends Activity {
                     System.out.println("d is good");
                 }
             }else
-                System.out.println("path가 없ㅇ므!");
+                System.out.println("path가 없음!");
         }
         catch (Exception e)
         {
@@ -168,7 +169,6 @@ public class LoadingActivity extends Activity {
 
             while((len = inputStream.read(buf)) > 0){
                 outputStream.write(buf, 0, len);
-                System.out.println(len);
             }
             outputStream.close();
             inputStream.close();

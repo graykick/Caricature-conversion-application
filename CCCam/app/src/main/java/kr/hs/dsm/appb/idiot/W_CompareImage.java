@@ -95,19 +95,14 @@ public class W_CompareImage extends Activity {
             int faceY = intent.getIntExtra("faceY", 0);
             int faceWidth = intent.getIntExtra("faceSizeWidth", 0);
             int faceHeight = intent.getIntExtra("faceSizeHeight", 0);
-            System.out.println("face Size = " + faceWidth + ", " + faceHeight);
             int eyePointX = intent.getIntExtra("eye1SizeX", 0);
             int eyePointY = intent.getIntExtra("eye1SizeY", 0);
-            System.out.println("eyepoint = " + eyePointX + ", " + eyePointY);
             int eye2PointX = intent.getIntExtra("eye2SizeX", 0);
             int eye2PointY = intent.getIntExtra("eye2SizeY", 0);
-            System.out.println("eye2point = " + eye2PointX + ", " + eye2PointY);
             int nosePointX = intent.getIntExtra("noseSizeX", 0);
             int nosePointY = intent.getIntExtra("noseSizeY", 0);
-            System.out.println("nosepoint = " + nosePointX + ", " + nosePointY);
             int mouthPointX = intent.getIntExtra("mouthSizeX", 0);
             int mouthPointY = intent.getIntExtra("mouthSizeY", 0);
-            System.out.println("mouthpoint = " + mouthPointX + ", " + mouthPointY);
 
             //convert long to mat
             Mat face = new Mat(LongFace);
@@ -192,7 +187,6 @@ public class W_CompareImage extends Activity {
                     }
                 }
 
-                System.out.println(w + "번째 눈 avg = " + compareTypeRect.compareEye1Ret);
                 if (compareTypeRect.compareEye1Ret > 0 && compareTypeRect.compareEye1Ret < compareTypeVar.compareEye1Val) {
                     finalEye1 = compareEye1;
                     compareTypeVar.compareEye1Val = compareTypeRect.compareEye1Ret;
@@ -273,27 +267,17 @@ public class W_CompareImage extends Activity {
 
             if (finalTypeInt.finalEyeInt == 0) {
                 finalTypeInt.finalEyeInt = (int) (Math.random() * 30 + 1);
-                Toast.makeText(getApplicationContext(),
-                        "눈 랜덤", Toast.LENGTH_SHORT).show();
-                System.out.println("눈 랜덤");
             }
             if (finalTypeInt.finalFaceInt == 0) {
                 finalTypeInt.finalFaceInt = (int) (Math.random() * 10 + 1);
-                Toast.makeText(getApplicationContext(),
-                        "얼굴랜덤", Toast.LENGTH_SHORT).show();
-                System.out.println("알굴 랜덤");
             }
 
             if (finalTypeInt.finalNoseInt == 0) {
                 finalTypeInt.finalNoseInt = (int) (Math.random() * 7 + 1);
-                System.out.println("코 랜덤");
             }
 
             if (finalTypeInt.finalLipsInt == 0) {
                 finalTypeInt.finalLipsInt = (int) (Math.random() * 10 + 1);
-                Toast.makeText(getApplicationContext(),
-                        "입 랜덤", Toast.LENGTH_SHORT).show();
-                System.out.println("입 랜덤");
             }
 
 
@@ -302,13 +286,11 @@ public class W_CompareImage extends Activity {
             BtFace = BitmapFactory.decodeFile(faceTypePath.face_Path + finalTypeInt.finalFaceInt + ".png");
             Bitmap copyBtFace = BtFace.copy(Bitmap.Config.ARGB_8888, true);
             copyBtFace = getResizedBitmap(copyBtFace, copyBtFace.getWidth() / 10 * 9, copyBtFace.getHeight() / 10 * 9);
-            System.out.println("BtFace Size = " + (copyBtFace.getWidth() / 3) * 2 + ", " + copyBtFace.getHeight());
 
             double BtFacePerRealFaceWidth = (double) faceWidth / (double) BtFace.getWidth();
             double BtFacePerRealFaceHeight = (double) faceHeight / (double) BtFace.getHeight();
 
             BtEye = BitmapFactory.decodeFile(faceTypePath.eye_Path + finalTypeInt.finalEyeInt + ".png");
-            System.out.println("dance Bteye " + BtEye.getWidth() + ", " + BtEye.getHeight());
             //  Bitmap copyBtEye = Bitmap.createScaledBitmap(BtEye,53 , 26  , true);
             copyBtEye = BtEye.copy(Bitmap.Config.ARGB_8888, true);
             copyBtEye = getResizedBitmap(copyBtEye, copyBtEye.getWidth() / 3, copyBtEye.getHeight() / 3);
@@ -321,24 +303,14 @@ public class W_CompareImage extends Activity {
             copyBtNose = BtNose.copy(Bitmap.Config.ARGB_8888, true);
             copyBtNose = getResizedBitmap(copyBtNose, copyBtNose.getWidth() / 10, copyBtNose.getHeight() / 10);
 
-//        BtEyeBrow = BitmapFactory.decodeFile(faceTypePath.eyes_brow_Path + 0 + ".png");
-            //      copyBtEyeBrow = BtEyeBrow.copy(Bitmap.Config.ARGB_8888, true);
-
-//        BtHair = BitmapFactory.decodeFile(faceTypePath.hair_Path + random + ".png");
-//        copyBtHair = BtHair.copy(Bitmap.Config.ARGB_8888, true);
-//        copyBtHair = getResizedBitmap(copyBtHair, copyBtHair.getWidth()/8, (copyBtHair.getHeight()/8) );
-//        System.out.println("Btperface = "+BtFacePerRealFaceWidth+", "+BtFacePerRealFaceHeight);
             int eyeLX2 = ((copyBtFace.getWidth() / 2) - (copyBtEye.getWidth()) - 14);
             int eyeLY2 = ((copyBtFace.getHeight() / 2) - 40);
-            System.out.println("eye position1 = " + eyeLX2 + ", " + eyeLY2);
 
             double eyeLX = eyePointX / BtFacePerRealFaceWidth - (copyBtEye.getWidth() / 2);
             double eyeLY = eyePointY / BtFacePerRealFaceHeight - (copyBtEye.getHeight() / 2);
-            System.out.println("eye position1 = " + eyeLX + ", " + eyeLY);
 
             int eyeLX3 = eyePointX - (copyBtEye.getWidth() / 2);
             int eyeLY3 = eyePointY - (copyBtEye.getHeight() / 2);
-            System.out.println("eye position2 = " + eyeLX3 + ", " + eyeLY3);
 
             double eyeRX = eye2PointX / BtFacePerRealFaceWidth - (copyBtEye.getWidth() / 2);
             double eyeRY = eye2PointY / BtFacePerRealFaceHeight - (copyBtEye.getHeight() / 2);

@@ -111,7 +111,6 @@ public class CameraResult extends Activity {
                 public void run() {
                     confirmHandler.sendEmptyMessage(0);
                     progDialog.setProgress(2);
-                    System.out.println("프로그래스바 동작");
                 }
             }).start();
 
@@ -242,7 +241,6 @@ public class CameraResult extends Activity {
                     Thread ThredEye = new Thread() {
                         public void run() {
                             try {
-                                System.out.println("size : " + ImageMat.size());
                                 eyesDetector.detectMultiScale(ImageMat, eyes);
                             } catch (Exception e) {
                                 System.out.println("eyes error");
@@ -254,7 +252,6 @@ public class CameraResult extends Activity {
                     Thread ThredNose = new Thread() {
                         public void run() {
                             try {
-                                System.out.println("size2 : " + ImageMat.size());
                                 nosesDetector.detectMultiScale(ImageMat, noses);
                             } catch (Exception e) {
                                 System.out.println("noses error");
@@ -273,11 +270,6 @@ public class CameraResult extends Activity {
                         }
                     };
                     ThredMouth.start();
-
-                    System.out.println("눈 Mat of Rect = " + eyes);
-                    System.out.println("코 Mat of Rect = " + noses);
-                    System.out.println("입 Mat of Rect = " + mouthes);
-
 
                     progDialog.setProgress(30);
 
@@ -326,7 +318,6 @@ public class CameraResult extends Activity {
                         try {
                             realEye1.x = realEye1.x - (rectLengthX / 10);
                         } catch (Exception e) {
-                            System.out.println(e.toString());
 
                             Intent intent1 = new Intent(CameraResult.this,
                                     MainActivity.class);
@@ -467,9 +458,6 @@ public class CameraResult extends Activity {
                 img.setImageBitmap(photo);
 
                 progDialog.dismiss();
-
-                System.out.println("프로그레스바 종료");
-
             }
 
             changeButton = (ImageButton) findViewById(R.id.change_cariculture);
