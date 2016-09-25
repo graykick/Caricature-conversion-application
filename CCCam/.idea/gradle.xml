@@ -10,14 +10,22 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/downloader_library" />
+            <option value="$PROJECT_DIR$/library" />
             <option value="$PROJECT_DIR$/openCVLibrary310" />
+            <option value="$PROJECT_DIR$/zip4j" />
+            <option value="$PROJECT_DIR$/zip_file" />
           </set>
         </option>
         <option name="myModules">
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/downloader_library" />
+            <option value="$PROJECT_DIR$/library" />
             <option value="$PROJECT_DIR$/openCVLibrary310" />
+            <option value="$PROJECT_DIR$/zip4j" />
+            <option value="$PROJECT_DIR$/zip_file" />
           </set>
         </option>
       </GradleProjectSettings>
