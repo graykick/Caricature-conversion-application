@@ -1,12 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="kr.hs.dsm.appb.idiot"
-    android:versionCode="172"
-    android:versionName="0.0.0.171">
+    android:versionCode="251"
+    android:largeHeap= "true"
+    android:hardwareAccelerated="false"
+    android:vmSafeMode="true"
+    android:versionName="0.0.0.250">
+
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
     <uses-feature android:name="android.hardware.camera"/>
 
@@ -35,11 +40,11 @@
         <activity
             android:name="kr.hs.dsm.appb.idiot.MainActivity"
             android:theme="@style/AppTheme" ></activity>
+        <activity android:name=".Gallery_main"></activity>
         <activity android:name="kr.hs.dsm.appb.idiot.CameraResult"></activity>
         <activity android:name="kr.hs.dsm.appb.idiot.CompareImage"></activity>
         <activity android:name="kr.hs.dsm.appb.idiot.W_CompareImage"></activity>
-
+        <activity android:name="kr.hs.dsm.appb.idiot.CompareResult"></activity>
 
     </application>
-
 </manifest>

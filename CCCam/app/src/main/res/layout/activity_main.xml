@@ -29,20 +29,6 @@
     </RelativeLayout>
 
     <ImageButton
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:text=""
-        android:background="#00000000"
-        android:src="@drawable/refresh"
-        android:id="@+id/change_button"
-        android:layout_marginLeft="23dp"
-        android:layout_marginStart="23dp"
-        android:layout_alignTop="@+id/layout1"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentBottom="true" />
-
-    <ImageButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/shoot_button"
@@ -52,6 +38,33 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true" />
 
+    <ImageButton
+        android:layout_width="45dp"
+        android:text=""
+        android:background="#00000000"
+        android:src="@drawable/refresh_button"
+        android:id="@+id/change_button"
+        android:layout_marginLeft="24dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="24dp"
+        android:layout_height="45dp"
+        android:layout_alignTop="@+id/layout1"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/go_gallery"
+        android:onClick="go_gallery_onClick"
+        android:background="#00000000"
+        android:src="@drawable/gallery"
+        android:layout_marginRight="26dp"
+        android:layout_marginEnd="26dp"
+        android:layout_below="@+id/layout1"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
 
     <!-- <FrameLayout
          android:layout_height="match_parent"

@@ -1,2 +1,2 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merger version="3"><dataSet config="main"><source path="D:\aaaaaaaaaaaaaaaaaaaaaaaa\CCCam\zip_file\src\main\assets"/><source path="D:\aaaaaaaaaaaaaaaaaaaaaaaa\CCCam\zip_file\build\generated\assets\shaders\release"/></dataSet><dataSet config="release"><source path="D:\aaaaaaaaaaaaaaaaaaaaaaaa\CCCam\zip_file\src\release\assets"/></dataSet></merger>
+<merger version="3"><dataSet config="main"><source path="D:\DATA\refesh\CCCam\zip_file\src\main\assets"/><source path="D:\DATA\refesh\CCCam\zip_file\build\generated\assets\shaders\release"/></dataSet><dataSet config="release"><source path="D:\DATA\refesh\CCCam\zip_file\src\release\assets"/></dataSet></merger>

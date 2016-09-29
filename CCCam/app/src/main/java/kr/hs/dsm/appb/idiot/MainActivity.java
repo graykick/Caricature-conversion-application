@@ -12,13 +12,10 @@ import android.view.KeyEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
-
 import java.io.FileOutputStream;
-import java.security.cert.Certificate;
 
 public class MainActivity extends Activity implements SurfaceHolder.Callback {
     @SuppressWarnings("deprecation")
@@ -27,6 +24,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
     SurfaceHolder surfaceHolder;
     ImageButton SHOOT_button;
     ImageButton CHANGE_button;
+    ImageButton Go_gallery;
     String str;
     int cameraFacing = Camera.CameraInfo.CAMERA_FACING_FRONT;
     Camera.Parameters param;
@@ -40,7 +38,16 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
         setContentView(R.layout.activity_main);
         SHOOT_button = (ImageButton) findViewById(R.id.shoot_button);
         CHANGE_button = (ImageButton) findViewById(R.id.change_button);
+        Go_gallery = (ImageButton) findViewById(R.id.go_gallery);
 
+        Go_gallery.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+                Intent goGallery = new Intent(MainActivity.this, Gallery_main.class);
+                startActivity(goGallery);
+            }
+        });
 
         Intent intent11 = new Intent(this,
                 MainActivity.class);
@@ -93,6 +100,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
             surfaceHolder = surfaceView.getHolder();
             surfaceHolder.addCallback(this);
             surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+
             jpegCallback = new Camera.PictureCallback() {
                 public void onPictureTaken(byte[] data, Camera camera) {
                     // 파일 저장
@@ -118,7 +126,6 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
                     intent.putExtra("strParamName", str);
                     int a = 0;
 
-                    //startActivity(intent);
                     startActivityForResult(intent, a);
                 }
             };
@@ -193,6 +200,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
             return;
         }
     }
+
     @Override
     public void surfaceChanged(SurfaceHolder holder,
                                int format, int width, int height) {

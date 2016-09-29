@@ -8,17 +8,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
 
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/imageView"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/imageView"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
     </RelativeLayout>
-
-
 
 
     <RelativeLayout
@@ -34,7 +31,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/go_home"
-            android:src="@drawable/close_button"
+            android:src="@drawable/cancel"
             android:background="#00000000"
             android:onClick="go_home_onclide"
             android:layout_marginLeft="28dp"
@@ -43,6 +40,18 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true" />
 
+        <ImageButton
+            android:background="#00000000"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="save"
+            android:src="@drawable/download_a"
+            android:id="@+id/saveButton"
+            android:layout_marginRight="32dp"
+            android:layout_marginEnd="32dp"
+            android:layout_alignTop="@+id/go_home"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true" />
 
 
         <!--<ImageButton

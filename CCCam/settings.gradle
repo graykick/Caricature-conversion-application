@@ -1,4 +1,4 @@
-include ':app', ':zip4j'
+include ':app', ':zip4j', ':galleryLIB'
 include ':openCVLibrary310'
 
 include ':downloader_library'

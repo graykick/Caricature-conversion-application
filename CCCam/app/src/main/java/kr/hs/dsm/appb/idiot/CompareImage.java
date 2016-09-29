@@ -5,31 +5,42 @@ package kr.hs.dsm.appb.idiot;
  */
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-
-import android.graphics.*;
 import android.widget.Toast;
 
-import org.opencv.core.*;
+import org.opencv.core.Mat;
 import org.opencv.imgcodecs.Imgcodecs;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Random;
 
 import compare.EyeCompare;
-import compare.MansHairCompare;
 import compare.FaceCompare;
 import compare.MouthCompare;
 import compare.NoseCompare;
@@ -40,40 +51,233 @@ import compare.NoseCompare;
  */
 public class CompareImage extends Activity {
 
-    private Mat temp;
     private String sd = Environment.getExternalStorageDirectory().getAbsolutePath();
 
-    boolean ThFaceCheck;
-    boolean ThEyeCheck;
-    boolean ThLipsCheck;
 
-    public Bitmap copyBtFace1;
 
     private Handler confirmHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            //완료 후 실행할 처리 삽입
-            Toast.makeText(getApplicationContext(),"완료!",Toast.LENGTH_SHORT).show();
+            //  Toast.makeText(getApplicationContext(),"완료!",Toast.LENGTH_SHORT).show();
         }
     };
 
+    protected  class Vector{
+        double x;
+        double y;
+        public Vector(double x, double y){
+            this.x = x;
+            this.y = y;
+        }
+
+        public void add(Vector vector){
+            this.x += vector.x;
+            this.y += vector.y;
+        }
+        public void sub(Vector vector){
+            this.x -= vector.x;
+            this.y -= vector.y;
+        }
+
+        public void mult(double how){
+            this.x *= how;
+            this.y *= how;
+        }
+
+        public void div(int how){
+            this.x /= how;
+            this.y /= how;
+        }
+
+        public int mag(){
+            int Vsize = (int)Math.sqrt(this.x*this.x+this.y*this.y);
+            return Vsize;
+        }
+
+        public void nomalize(){
+            if(this.mag() != 0){
+                this.div(this.mag());
+            }
+        }
+
+        public void limit(int limitNum){
+            if(this.mag()>limitNum){
+                this.nomalize();
+                this.mult(limitNum);
+            }
+        }
+
+        public Vector addStatic(Vector Vector1, Vector Vector2){
+            Vector addedVector = new Vector(Vector1.x+Vector2.x,Vector1.y+Vector2.y);
+            return addedVector;
+        }
+
+        public Vector subStatic(Vector Vector1, Vector Vector2){
+            Vector subedVector = new Vector(Vector1.x-Vector2.x,Vector1.y-Vector2.y);
+            return subedVector;
+        }
+    }
+    public class MyView extends View implements Runnable{
+        Thread animator = null;
+        int width;
+        int height;
+
+        Vector location;
+        Vector velocity;
+        Vector acceleration;
+        Vector dir;
+        int touchX;
+        int touchY=300;
+        Vector touch = new Vector(touchX, touchY);
+        Canvas mainCanvas = null;
+        Bitmap CanvasBitmap;
+        Bitmap gradient = BitmapFactory.decodeResource(super.getResources(),
+                R.drawable.gradient);
+
+
+        public  boolean onTouchEvent(MotionEvent event){
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_MOVE:
+                    touchX = (int)event.getX();
+                    touchY = (int)event.getY();
+                    break;
+                default:
+            }
+            return true;
+        }
+
+        public MyView(Context context) {
+            super(context);
+            DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
+            width = displayMetrics.widthPixels;
+            height = displayMetrics.heightPixels;
+            touchX = width/2;
+            touchY = height/2;
+            CanvasBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            this.location = new Vector(width/2, height/5);
+            this.velocity = new Vector(-5, 0);
+        }
+
+        public void update(){
+            touch = new Vector(touchX, touchY);
+            dir = touch.subStatic(touch, location);
+            dir.nomalize();
+            dir.mult(0.5);
+            acceleration = dir;
+            velocity.add(acceleration);
+            velocity.limit(20);
+            location.add(velocity);
+        }
+
+        public void checkEdge(){
+            if(location.x<0){
+                location.x=0;
+                velocity.x *= -1;
+            } else if(location.x>width){
+                location.x = width;
+                velocity.x *= -1;
+            };
+
+            if(location.y<0){
+                location.y=0;
+                velocity.y *= -1;
+            } else if(location.y>height){
+                location.y = height;
+                velocity.y *= -1;
+            };
+
+
+        }
+
+        void start(){
+            animator = new Thread(this);
+            animator.start();
+        }
+
+        public void run() {
+            while(true){
+                //     System.out.println("in run while");
+                postInvalidate();
+//                invalidate();
+                try {
+                    Thread.sleep(15, 0);
+                }
+                catch (InterruptedException e)
+                {
+                    ;
+                }
+            }
+        }
+
+        Paint Pnt = new Paint();
+        Paint TextPnt = new Paint();
+
+        @Override
+        public void onDraw(Canvas canvas) {
+            update();
+            checkEdge();
+
+            Canvas c = new Canvas();
+            c.drawBitmap(CanvasBitmap, 0, 0, new Paint());
+            c = new Canvas(CanvasBitmap);
+            int backColor = Color.argb(255, 255, 255, 255);
+
+            setBackgroundColor(backColor);
+
+
+
+
+            Random rnd = new Random();
+            int color = Color.argb(255, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256));
+            Pnt.setColor(color);
+            Pnt.setStrokeWidth(50);
+            Pnt.setStyle(Paint.Style.STROKE);
+
+            TextPnt.setAlpha(100);
+            TextPnt.setTextSize(90);
+
+            c.drawText("캐리커처가 그려지고 있습니다",(width - TextPnt.measureText("캐리커처가 그려지고 있습니다")) / 2, height / 10, TextPnt);
+            c.drawText("화면을 드래그 하세요",(width - TextPnt.measureText("화면을 드래그 하세요")) / 2, height / 7, TextPnt);
+
+            final Paint paint = new Paint();
+            final Rect rect = new Rect(0, 0, gradient.getWidth(), gradient.getHeight());
+            paint.setAntiAlias(true);
+            c.drawARGB(0, 0, 0, 0);
+            int size = (gradient.getWidth() / 2);
+            //     c.drawCircle(size, size, size, paint);
+            paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+            c.drawBitmap(gradient, rect, rect, paint);
+
+            c.drawCircle((int)location.x, (int)location.y, 50, Pnt);
+            canvas.drawBitmap(CanvasBitmap, 0, 0, new Paint());
+            // CanvasBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            // canvas.setBitmap(CanvasBitmap);
+            // canvas = new Canvas(CanvasBitmap);
+            super.onDraw(canvas);
+          /*  if(!CompareStart) {
+                CompareStart = true;
+                startCompare();
+            }*/
+        }
+    }
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.compare);
+        // setContentView(R.layout.compare);
 
-        Intent intent11 = new Intent(this,
+
+        new CompareStartTask().execute();
+
+    }
+    public void startCompare(){
+        final Intent intentMain = new Intent(this,
                 MainActivity.class);
 
         final Intent intent = getIntent();
+
         try {
             final ImageView img = (ImageView) findViewById(R.id.imageView);
-            //ImageButton saveButton = (ImageButton) findViewById(R.id.saveButton);
 
-            ThFaceCheck = false;
-            ThEyeCheck = false;
-            ThLipsCheck = false;
-
-            /**    객체 생성 부분   **/
             Face_Type_Path faceTypePath = new Face_Type_Path();
             Imgread_Type_Path imgreadTypePath = new Imgread_Type_Path();
             Compare_Type_Rect compareTypeRect = new Compare_Type_Rect();
@@ -90,53 +294,10 @@ public class CompareImage extends Activity {
             long LongNose = intent.getLongExtra("nose", 0);
             long LongMouth = intent.getLongExtra("mouth", 0);
 
-            int faceX = intent.getIntExtra("faceX", 0);
-            int faceY = intent.getIntExtra("faceY", 0);
-            int faceWidth = intent.getIntExtra("faceSizeWidth", 0);
-            int faceHeight = intent.getIntExtra("faceSizeHeight", 0);
-            int eyePointX = intent.getIntExtra("eye1SizeX", 0);
-            int eyePointY = intent.getIntExtra("eye1SizeY", 0);
-            int eye2PointX = intent.getIntExtra("eye2SizeX", 0);
-            int eye2PointY = intent.getIntExtra("eye2SizeY", 0);
-            int nosePointX = intent.getIntExtra("noseSizeX", 0);
-            int nosePointY = intent.getIntExtra("noseSizeY", 0);
-            int mouthPointX = intent.getIntExtra("mouthSizeX", 0);
-            int mouthPointY = intent.getIntExtra("mouthSizeY", 0);
-
-            //convert long to mat
             Mat face = new Mat(LongFace);
             Mat eye1 = new Mat(LongEye1);
             Mat nose = new Mat(LongNose);
             Mat mouth = new Mat(LongMouth);
-
-
-        /*final ProgressDialog progDialog = new ProgressDialog( this );
-        progDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-        progDialog.setProgress(0);
-        progDialog.setMax(100);
-        progDialog.setMessage("please wait....");
-        progDialog.setIndeterminate(true);
-        //progDialog.show();
-
-        new Thr
-                confirmHandler.sendEmptyMessage(0);
-                if (progDialog.isShowing()){
-                    progDialog.setProgress(2);
-                    System.out.println("프로그래스바 동작");
-                }*/
-
-
-
-               /* imgreadTypePath.facePath = intent.getStringExtra("face");
-                imgreadTypePath.eye1Path = intent.getStringExtra("eye1");
-                imgreadTypePath.eye2Path = intent.getStringExtra("eye2");
-                imgreadTypePath.nosePath =  intent.getStringExtra("nose");
-                imgreadTypePath.mouthPath = intent.getStringExtra("mouth");
-
-                final Mat face = Imgcodecs.imread(imgreadTypePath.facePath);
-                final Mat eye1 = Imgcodecs.imread(imgreadTypePath.eye1Path);
-                final Mat nose = Imgcodecs.imread(imgreadTypePath.nosePath);
-                final Mat mouth = Imgcodecs.imread(imgreadTypePath.mouthPath);*/
 
             Mat compareFace = new Mat();
             Mat compareManHair = new Mat();
@@ -151,11 +312,9 @@ public class CompareImage extends Activity {
             Mat finalNose = null;
             Mat finalMouth = null;
 
-            temp = face;
-
 
             for (int q = 0; q < 100; q++) {
-                compareFace = Imgcodecs.imread(faceTypePath.face_Path + q + ".png");
+                compareFace = Imgcodecs.imread(faceTypePath.mansHair_Path + q + ".png");
 
                 if (compareFace.dataAddr() != 0x0) {
                     try {
@@ -280,76 +439,74 @@ public class CompareImage extends Activity {
             }
 
 
-            Bitmap BtFace, BtNose, copyBtNose, BtEyeBrow, copyBtEyeBrow, BtHair, copyBtHair = null, BtEye, copyBtEye, BtLips, copyBtLips;
+            Bitmap BtFace, BtNose, copyBtNose, BtEye, copyBtEye, BtLips, copyBtLips, BtLogo;
 
-            BtFace = BitmapFactory.decodeFile(faceTypePath.face_Path +  random + ".png");
+            BtFace = BitmapFactory.decodeFile(faceTypePath.mansHair_Path +  random + ".png");
             Bitmap copyBtFace = BtFace.copy(Bitmap.Config.ARGB_8888, true);
-            copyBtFace = getResizedBitmap(copyBtFace, copyBtFace.getWidth() / 10 * 9, copyBtFace.getHeight() / 10 * 9);
 
-            double BtFacePerRealFaceWidth = (double) faceWidth / (double) BtFace.getWidth();
-            double BtFacePerRealFaceHeight = (double) faceHeight / (double) BtFace.getHeight();
+            BtLogo = BitmapFactory.decodeFile(faceTypePath.logo_Path);
+            Bitmap copyBtLogo = BtLogo.copy(Bitmap.Config.ARGB_8888, true);
+            copyBtLogo = getResizedBitmap(copyBtLogo, copyBtFace.getWidth()/10*8, copyBtFace.getHeight()/10);
 
             BtEye = BitmapFactory.decodeFile(faceTypePath.eye_Path + finalTypeInt.finalEyeInt + ".png");
             //  Bitmap copyBtEye = Bitmap.createScaledBitmap(BtEye,53 , 26  , true);
             copyBtEye = BtEye.copy(Bitmap.Config.ARGB_8888, true);
-            copyBtEye = getResizedBitmap(copyBtEye, copyBtEye.getWidth() / 3, copyBtEye.getHeight() / 3);
+            copyBtEye = getResizedBitmap(copyBtEye, copyBtFace.getWidth() / 4, copyBtFace.getHeight() / 7);
 
             BtLips = BitmapFactory.decodeFile(faceTypePath.mouth_Path + finalTypeInt.finalLipsInt + ".png");
             //     Bitmap sizingBmp = Bitmap.createScaledBitmap(bitmap, (int) width, (int) height, true);
             copyBtLips = BtLips.copy(Bitmap.Config.ARGB_8888, true);
-            copyBtLips = getResizedBitmap(copyBtLips, copyBtLips.getWidth() / 13, copyBtLips.getHeight() / 13);
+            copyBtLips = getResizedBitmap(copyBtLips, copyBtFace.getWidth()/10*5, copyBtFace.getHeight()/10*1);
             BtNose = BitmapFactory.decodeFile(faceTypePath.nose_Path + finalTypeInt.finalNoseInt + ".png");
             copyBtNose = BtNose.copy(Bitmap.Config.ARGB_8888, true);
-            copyBtNose = getResizedBitmap(copyBtNose, copyBtNose.getWidth() / 10, copyBtNose.getHeight() / 10);
+            copyBtNose = getResizedBitmap(copyBtNose, copyBtFace.getWidth()/10*3, copyBtFace.getWidth()/10*3);
+            System.out.println("size : "+ copyBtFace.getWidth()/10*3 + "x" + copyBtFace.getHeight()/10*3);
 
-//        BtEyeBrow = BitmapFactory.decodeFile(faceTypePath.eyes_brow_Path + 0 + ".png");
-            //      copyBtEyeBrow = BtEyeBrow.copy(Bitmap.Config.ARGB_8888, true);
+            int eyeY = copyBtFace.getHeight()/100*41;
+            int eyeLX = copyBtFace.getWidth()/100*24;
+            int eyeRX = copyBtFace.getWidth()/100*60;
 
-//        BtHair = BitmapFactory.decodeFile(faceTypePath.hair_Path + random + ".png");
-//        copyBtHair = BtHair.copy(Bitmap.Config.ARGB_8888, true);
-//        copyBtHair = getResizedBitmap(copyBtHair, copyBtHair.getWidth()/8, (copyBtHair.getHeight()/8) );
-//        System.out.println("Btperface = "+BtFacePerRealFaceWidth+", "+BtFacePerRealFaceHeight);
-            int eyeLX2 = ((copyBtFace.getWidth() / 2) - (copyBtEye.getWidth()) - 14);
-            int eyeLY2 = ((copyBtFace.getHeight() / 2) - 40);
+            int noseX = copyBtFace.getWidth()/100*38;
+            int noseY = copyBtFace.getHeight()/100*46;
 
-            double eyeLX = eyePointX / BtFacePerRealFaceWidth - (copyBtEye.getWidth() / 2);
-            double eyeLY = eyePointY / BtFacePerRealFaceHeight - (copyBtEye.getHeight() / 2);
+            int lipX = copyBtFace.getWidth()/100*30;
+            int lipY = copyBtFace.getHeight()/100*60;
 
-            int eyeLX3 = eyePointX - (copyBtEye.getWidth() / 2);
-            int eyeLY3 = eyePointY - (copyBtEye.getHeight() / 2);
+            int logoX = copyBtFace.getWidth()/100*35;
+            int logoY = copyBtFace.getHeight()/100*75;
 
-            double eyeRX = eye2PointX / BtFacePerRealFaceWidth - (copyBtEye.getWidth() / 2);
-            double eyeRY = eye2PointY / BtFacePerRealFaceHeight - (copyBtEye.getHeight() / 2);
+            pasteImage(copyBtFace, change(copyBtEye, 2), eyeLX, eyeY);
+            pasteImage(copyBtFace, copyBtEye, eyeRX, eyeY);
+            pasteImage(copyBtFace, copyBtNose, noseX, noseY);
+            pasteImage(copyBtFace, copyBtLips, lipX, lipY);
+            pasteImage(copyBtFace, copyBtLogo, logoX, logoY);
+            Log.d("", "4");
 
-            double noseX = nosePointX / BtFacePerRealFaceWidth - (copyBtNose.getWidth() / 2);
-            double noseY = nosePointY / BtFacePerRealFaceHeight - (copyBtNose.getHeight() / 2);
+            final Bitmap copyBtFace2 =  copyBtFace;
+            Log.d("", "5");
+            final Intent PushIntent = new Intent(this,
+                    CompareResult.class);
 
-            double lipX = mouthPointX / BtFacePerRealFaceWidth - (copyBtLips.getWidth() / 2);
-            double lipY = mouthPointY / BtFacePerRealFaceHeight - (copyBtLips.getHeight() / 2);
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            copyBtFace2.compress(Bitmap.CompressFormat.PNG, 100, stream);
+            byte[] bytesFace = stream.toByteArray();
+            PushIntent.putExtra("bytesFace",bytesFace);
 
+            finish();
+            startActivity(PushIntent);
 
-            // int eyebroRX = eyeRX;
-            //int eyebroRY = eyeRY - 20;
-
-            int eyebroLX = (int) eyeLX;
-            int eyebroLY = (int) eyeLY - 20;
-
-            //int earRX = eyeRX + 60;
-            //int earRY = eyeRY - 14;
-
-            int earLX = (int) eyeLX - 40;
-            int earLY = (int) eyeLY - 14;
-            Log.d("", "test" + copyBtHair);
-            // pasteImage(copyBtFace, copyBtHair, -(faceWidth/14*1), 0);
-            pasteImage(copyBtFace, copyBtLips, (int) lipX - faceWidth / 30, (int) lipY - faceHeight / 15);
-            pasteImage(copyBtFace, copyBtNose, (int) noseX - faceWidth / 30, (int) noseY - faceHeight / 15);
-            pasteImage(copyBtFace, copyBtEye, (int) eyeRX - faceWidth / 30, (int) eyeRY - faceHeight / 20);
-            pasteImage(copyBtFace, chage(copyBtEye, 2), (int) eyeLX - faceWidth / 30, (int) eyeLY - faceHeight / 20);
-            //      pasteImage(copyBtFace, copyBtEyeBrow, eyebroRX, eyebroRY);
-            //      pasteImage(copyBtFace, chage(copyBtEyeBrow, 2), eyebroLX, eyebroLY);
-            // pasteImage(copyBtFace, copyBtHair, 0, 0);
-
+           /* System.out.println("size : " + copyBtFace.getWidth()+"x"+copyBtFace.getHeight());
             img.setImageBitmap(copyBtFace);
+
+
+
+            final Button saveButton = (Button) findViewById(R.id.saveButton);
+            saveButton.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    saveBitmap(copyBtFace2, "/DCIM/caricature/", (int) System.currentTimeMillis() + ".jpg");
+                    saveBitmap(copyBtFace2, "/DCIM/", (int) System.currentTimeMillis() + ".jpg");
+                }
+            });*/
 
             faceTypePath = null;
             imgreadTypePath = null;
@@ -360,20 +517,20 @@ public class CompareImage extends Activity {
             eyeCompare = null;
             mouthCompare = null;
             noseCompare = null;
+            copyBtEye.isRecycled();
+            copyBtFace.isRecycled();
+            copyBtLips.isRecycled();
+            copyBtNose.isRecycled();
+            compareEye1 = null; compareEye2 = null; compareFace = null; compareGirlHair = null; compareManHair = null; compareMouth = null; compareNose = null;
 
             System.gc();
-           /* saveButton.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    finish();
-                    String name = "caricuture";
-                    saveBitmap(copyBtFace1, "boom", name);
-                }
-            });*/
+
         }catch (Exception e){
             finish();
-            startActivity(intent11);
-            Toast.makeText(getApplicationContext(),"오류가 발생했습니다!", Toast.LENGTH_SHORT).show();
+            startActivity(intentMain);
+            //  Toast.makeText(getApplicationContext(),"오류가 발생했습니다!", Toast.LENGTH_SHORT).show();
         }
+
     }
 
     public static void pasteImage(Bitmap target, Bitmap src, int x, int y) {
@@ -385,7 +542,7 @@ public class CompareImage extends Activity {
     public static final int FLIP_VERTICAL = 1;
     public static final int FLIP_HORIZONTAL = 2;
 
-    public static Bitmap chage(Bitmap src, int type) {
+    public static Bitmap change(Bitmap src, int type) {
         Matrix matrix = new Matrix();
 
         if (type == FLIP_VERTICAL) {
@@ -421,63 +578,38 @@ public class CompareImage extends Activity {
     }
 
 
-    private void saveBitmap(Bitmap compliteFace, String folder, String name){
-        String ex_storage =Environment.getExternalStorageDirectory().getAbsolutePath();
-        // Get Absolute Path in External Sdcard
-        String foler_name = "/"+folder+"/";
-        String file_name = name+".jpg";
-        String string_path = ex_storage+foler_name;
 
-        Toast.makeText(getApplicationContext(),
-                "저장 중입니다. 조금 시간이 오래 걸릴 수 있어요!", Toast.LENGTH_SHORT).show();
+    public class CompareStartTask extends AsyncTask<Void, Void, Void> {
 
-        File file_path;
-        try{
-            file_path = new File(string_path);
-            if(!file_path.isDirectory()){
-                file_path.mkdirs();
-            }
-            FileOutputStream out = new FileOutputStream(string_path+file_name);
+        @Override
+        protected void onPreExecute() {
+            MyView view = new MyView(CompareImage.this);
+            setContentView(view);
+            view.start();
+        }
 
-            compliteFace.compress(Bitmap.CompressFormat.PNG, 100, out);
-            out.close();
-        }catch(FileNotFoundException exception){
-            Log.e("FileNotFoundException", exception.getMessage());
-        }catch(IOException exception){
-            Log.e("IOException", exception.getMessage());
+        @Override
+        protected Void doInBackground(Void... params) {
+            startCompare();
+            return null;
         }
     }
-    public void go_home_onclide(View v){
-        Intent intent = new Intent(CompareImage.this,
-                MainActivity.class);
-
-        finish();
-
-
-        startActivity(intent);
-    }
 }
+
 
 
 class Face_Type_Path{
 
     private String sd = Environment.getExternalStorageDirectory().getAbsolutePath();
-
-    protected String face_Path= sd + "/" + "CCCam_Picture" +"/"+"mans_face"+"/"+"__";
-    protected String mansHair_Path = sd + "/" + "CCCam_Picture" +"/"+"mans_hair"+"/"+"_hair";
-    protected String girlsHair_Path = sd + "/" + "CCCam_Picture" +"/"+"girls_hair"+"/"+"_hair";
-    protected String eye_Path = sd + "/" + "CCCam_Picture" +"/"+"eyes"+"/"+"eye_brow";
-    protected String nose_Path = sd + "/" + "CCCam_Picture" +"/"+"nose"+"/"+"_";
-    protected String mouth_Path = sd + "/" + "CCCam_Picture" +"/"+"mouth"+"/"+"_";
-    protected String eyes_brow_Path = sd + "/" + "CCCam_Picture" +"/"+"eyes_brow"+"/"+"eyesbrow";
-    protected String hair_Path = sd + "/" + "CCCam_Picture" +"/"+"mans_hair"+"/"+"_hair";
+    protected String logo_Path = sd + "/" + ".CCCam_Picture" +"/"+"logo"+"/"+"watermark.png";
+    protected String mansHair_Path = sd + "/" + ".CCCam_Picture" +"/"+"mans_face"+"/"+"hair";
+    protected String eye_Path = sd + "/" + ".CCCam_Picture" +"/"+"eyes"+"/"+"eye_brow";
+    protected String nose_Path = sd + "/" + ".CCCam_Picture" +"/"+"nose"+"/"+"_";
+    protected String mouth_Path = sd + "/" + ".CCCam_Picture" +"/"+"mouth"+"/"+"_";
 
 }
 
 class Imgread_Type_Path{
-
-    CompareImage compareImage = new CompareImage();
-    Intent intent = compareImage.getIntent();
 
     protected String facePath;
     protected String eye1Path;

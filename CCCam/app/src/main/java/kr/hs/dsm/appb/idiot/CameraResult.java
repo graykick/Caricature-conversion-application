@@ -2,6 +2,7 @@ package kr.hs.dsm.appb.idiot;
 /**
  * Created by dsm_024 on 2016-05-31.
  */
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -9,9 +10,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.media.Image;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -22,15 +21,15 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import org.opencv.android.Utils;
-import org.opencv.core.MatOfRect;
-import org.opencv.core.Rect;
-import org.opencv.core.Size;
-import org.opencv.imgproc.Imgproc;
-import org.opencv.imgcodecs.*;
 import org.opencv.core.Mat;
-import org.opencv.objdetect.CascadeClassifier;
+import org.opencv.core.MatOfRect;
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
+import org.opencv.objdetect.CascadeClassifier;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -45,28 +44,15 @@ public class CameraResult extends Activity {
     public  CascadeClassifier eyesDetector;
     public  CascadeClassifier nosesDetector;
     public  CascadeClassifier mouthesDetector;
-
-    private Handler mHandler;
-    private ProgressDialog mProgressDialog;
+    private ImageButton garbage;
 
     private Mat matFace;
     private Mat matEye1;
     private Mat matEye2;
     private Mat matNose;
     private Mat matMouth;
-    private Rect facePoint;
-    private Rect eyePoint;
-    private Rect eye2Point;
-    private Rect nosePoint;
-    private Rect mouthPoint;
-/*    private String facePath;
-    private String eye1Path;
-    private String eye2Path;
-    private String mouthPath;
-    private String nosePath;*/
+
     public ImageView img;
-/*    private String sd = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath();
-    private String path = sd + "/";*/
     private ImageButton changeButton;
     public Mat ImageMat;
     public Mat ImageMatClone;
@@ -92,7 +78,7 @@ public class CameraResult extends Activity {
 
         setContentView(R.layout.activity_camera_result);
 
-        Intent intent11 = new Intent(CameraResult.this,
+        final Intent intentMain = new Intent(CameraResult.this,
                 MainActivity.class);
         Intent intent = getIntent();
 
@@ -215,7 +201,6 @@ public class CameraResult extends Activity {
                 Log.e(TAG, "Failed to load cascade, Exception thrown:" + e);
             }
 
-
             progDialog.setProgress(20);
 
             final MatOfRect faces = new MatOfRect();
@@ -225,9 +210,6 @@ public class CameraResult extends Activity {
 
                     Rect face = faceRect.clone();
                     matFace = ImageMat.submat(face);
-               /* facePath = path + "face.jpg";
-                Imgcodecs.imwrite(facePath, matFace);*/
-                    facePoint = face;
 
                     Imgproc.rectangle(ImageMatClone, new Point(faceRect.x - 10, faceRect.y + 10),
                             new Point(faceRect.x - 10 + faceRect.width + 10, faceRect.y + 10 + faceRect.height + 10),
@@ -242,6 +224,7 @@ public class CameraResult extends Activity {
                         public void run() {
                             try {
                                 eyesDetector.detectMultiScale(ImageMat, eyes);
+                                join();
                             } catch (Exception e) {
                                 System.out.println("eyes error");
                             }
@@ -253,6 +236,7 @@ public class CameraResult extends Activity {
                         public void run() {
                             try {
                                 nosesDetector.detectMultiScale(ImageMat, noses);
+                                join();
                             } catch (Exception e) {
                                 System.out.println("noses error");
                             }
@@ -264,6 +248,7 @@ public class CameraResult extends Activity {
                         public void run() {
                             try {
                                 mouthesDetector.detectMultiScale(ImageMat, mouthes);
+                                join();
                             } catch (Exception e) {
                                 System.out.println("mouthes error");
                             }
@@ -319,12 +304,12 @@ public class CameraResult extends Activity {
                             realEye1.x = realEye1.x - (rectLengthX / 10);
                         } catch (Exception e) {
 
-                            Intent intent1 = new Intent(CameraResult.this,
-                                    MainActivity.class);
-                            startActivity(intent1);
+
+                            finish();
+                            startActivity(intentMain);
 
                             Toast.makeText(getApplicationContext(),
-                                    "오류 입니다.1111", Toast.LENGTH_LONG).show();
+                                    "오류 입니다.", Toast.LENGTH_LONG).show();
 
 
                         }
@@ -339,8 +324,8 @@ public class CameraResult extends Activity {
                             realEye2.width = realEye2.width + (rectLengthX / 10) * 2;
                         } catch (Exception e) {
                             Toast.makeText(getApplicationContext(), "오류가 발생했습니다.", Toast.LENGTH_SHORT);
+                            finish();
                             startActivity(intent);
-
                         }
                         Rect eye1 = realEye1.clone();
                         Rect eye2 = realEye2.clone();
@@ -348,8 +333,6 @@ public class CameraResult extends Activity {
                         matEye1 = ImageMat.submat(eye1);
                         matEye2 = ImageMat.submat(eye2);
 
-                        eyePoint = eye1;
-                        eye2Point = eye2;
                   /*  eye1Path = path + "eye1.png";
                     eye2Path = path + "eye2.png";
                     Imgcodecs.imwrite(eye1Path, matEye1);
@@ -365,7 +348,7 @@ public class CameraResult extends Activity {
                     } else {
                         Toast.makeText(getApplicationContext(),
                                 "눈을 찾지 못했습니다!", Toast.LENGTH_LONG).show();
-                        finish();
+                       startActivity(intentMain);
 
                     }
 
@@ -383,7 +366,6 @@ public class CameraResult extends Activity {
 
                                             Rect nose = noseRect.clone();
                                             matNose = ImageMat.submat(nose);
-                                            nosePoint = noseRect;
                                       /*  nosePath = path + "nose.png";
                                         Imgcodecs.imwrite(nosePath, matNose);*/
 
@@ -398,7 +380,6 @@ public class CameraResult extends Activity {
 
                                             Rect mouth = mouthRect.clone();
                                             matMouth = ImageMat.submat(mouth);
-                                            mouthPoint = mouthRect;
                                       /*  mouthPath = path + "mouth.png";
                                         Imgcodecs.imwrite(mouthPath, matMouth);*/
 
@@ -415,7 +396,6 @@ public class CameraResult extends Activity {
                             Rect nose = new Rect(noseX, realEye1.y, rectLengthX / 10 * 4, rectLengthY / 2);
 
                             matNose = ImageMat.submat(nose);
-                            nosePoint = nose;
                       /*  nosePath = path + "nose.png";
                         Imgcodecs.imwrite(nosePath, matNose);*/
 
@@ -429,7 +409,6 @@ public class CameraResult extends Activity {
                             mouthRect.height = (rectLengthY) / 10 * 3;
 
                             matMouth = ImageMat.submat(mouthRect);
-                            mouthPoint = mouthRect;
                       /*  mouthPath = path + "mouth.png";
                         Imgcodecs.imwrite(mouthPath, matMouth);*/
 
@@ -444,7 +423,7 @@ public class CameraResult extends Activity {
             } else {
                 Toast.makeText(getApplicationContext(),
                         "얼굴을 찾지 못했습니다!", Toast.LENGTH_LONG).show();
-                finish();
+               startActivity(intentMain);
             }
 
             if (checkMatClone) {
@@ -456,9 +435,19 @@ public class CameraResult extends Activity {
                 progDialog.setProgress(100);
 
                 img.setImageBitmap(photo);
-
+                photo = null;
                 progDialog.dismiss();
             }
+
+            garbage = (ImageButton) findViewById(R.id.delete_picture);
+            garbage.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    finish();
+                    startActivity(intentMain);
+                }
+            });
+
 
             changeButton = (ImageButton) findViewById(R.id.change_cariculture);
 
@@ -488,44 +477,7 @@ public class CameraResult extends Activity {
                         intent_w.putExtra("nose", LongmatNose);
                         intent_w.putExtra("mouth", LongmatMouth);
 
-                        android.graphics.Point eyePointer = new android.graphics.Point((eyePoint.x + eyePoint.width) - (eyePoint.width / 2), (eyePoint.y + eyePoint.height) - (eyePoint.height / 2));
-                        android.graphics.Point eye2Pointer = new android.graphics.Point((eye2Point.x + eye2Point.width) - (eye2Point.width / 2), (eye2Point.y + eye2Point.height) - (eye2Point.height / 2));
-                        android.graphics.Point nosePointer = new android.graphics.Point((nosePoint.x + nosePoint.width) - (nosePoint.width / 2), (nosePoint.y + nosePoint.height) - (nosePoint.height / 2));
-                        android.graphics.Point mouthPointer = new android.graphics.Point((mouthPoint.x + mouthPoint.width) - (mouthPoint.width / 2), (mouthPoint.y + mouthPoint.height) - (mouthPoint.height / 2));
 
-
-                        intent.putExtra("faceSizeWidth", facePoint.width);
-                        intent.putExtra("faceSizeHeight", facePoint.height);
-                        intent.putExtra("faceX", facePoint.x);
-                        intent.putExtra("faceY", facePoint.y);
-                        intent.putExtra("eye1SizeX", eyePointer.x - facePoint.x);
-                        intent.putExtra("eye1SizeY", eyePointer.y - facePoint.y + 80);
-                        intent.putExtra("eye2SizeX", eye2Pointer.x - facePoint.x);
-                        intent.putExtra("eye2SizeY", eye2Pointer.y - facePoint.y + 80);
-                        intent.putExtra("noseSizeX", nosePointer.x - facePoint.x);
-                        intent.putExtra("noseSizeY", nosePointer.y - facePoint.y + 80);
-                        intent.putExtra("mouthSizeX", mouthPointer.x - facePoint.x);
-                        intent.putExtra("mouthSizeY", mouthPointer.y - facePoint.y);
-
-                        intent_w.putExtra("faceSizeWidth", facePoint.width);
-                        intent_w.putExtra("faceSizeHeight", facePoint.height);
-                        intent_w.putExtra("faceX", facePoint.x);
-                        intent_w.putExtra("faceY", facePoint.y);
-                        intent_w.putExtra("eye1SizeX", eyePointer.x - facePoint.x);
-                        intent_w.putExtra("eye1SizeY", eyePointer.y - facePoint.y + 80);
-                        intent_w.putExtra("eye2SizeX", eye2Pointer.x - facePoint.x);
-                        intent_w.putExtra("eye2SizeY", eye2Pointer.y - facePoint.y + 80);
-                        intent_w.putExtra("noseSizeX", nosePointer.x - facePoint.x);
-                        intent_w.putExtra("noseSizeY", nosePointer.y - facePoint.y + 80);
-                        intent_w.putExtra("mouthSizeX", mouthPointer.x - facePoint.x);
-                        intent_w.putExtra("mouthSizeY", mouthPointer.y - facePoint.y);
-
-                    /*intent.putExtra("face", facePath);
-                    intent.putExtra("eye1", eye1Path);
-                    intent.putExtra("eye2", eye2Path);
-                    intent.putExtra("nose", nosePath);
-                    intent.putExtra("mouth", mouthPath);
-*/
                         AlertDialog.Builder builder = new AlertDialog.Builder(CameraResult.this);
 
                         builder.setTitle("성별 여부")
@@ -559,15 +511,9 @@ public class CameraResult extends Activity {
             });
         }catch (Exception e){
             finish();
-            startActivity(intent11);
+            startActivity(intentMain);
             Toast.makeText(getApplicationContext(),"오류가 발생했습니다!", Toast.LENGTH_SHORT).show();
         }
     }
-    public void garbage_onClick(View v) {
-        Intent intent = new Intent(CameraResult.this,
-                MainActivity.class);
-        img.setImageBitmap(null);
-        finish();
-        startActivity(intent);
-    }
+
 }

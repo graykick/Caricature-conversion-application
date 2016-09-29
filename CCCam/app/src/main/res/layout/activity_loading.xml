@@ -8,6 +8,15 @@
         android:layout_height="match_parent"
         android:background="#5DC23E"/>
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="CCCam"
+        android:layout_marginTop="54dp"
+        android:textSize="40dp"
+        android:layout_below="@+id/loading_image"
+        android:layout_centerHorizontal="true" />
+
     <ImageView
         android:id="@+id/loading_image"
         android:layout_width="190dp"
@@ -16,15 +25,6 @@
         android:background="@drawable/circle_border"
         android:layout_marginTop="135dp"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="CCCam"
-        android:layout_marginTop="54dp"
-        android:textSize="30dp"
-        android:layout_below="@+id/loading_image"
         android:layout_centerHorizontal="true" />
 
 </RelativeLayout>
