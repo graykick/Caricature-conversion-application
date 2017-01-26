@@ -1,2 +1,2 @@
-# CICICIam
+# CCCam
 Caricature conversion application
